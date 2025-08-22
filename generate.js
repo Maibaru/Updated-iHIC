@@ -23,7 +23,7 @@ function formatDate(date) {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${day}/${month/${year}`;
 }
 
 function getExpiryStatus(expiryDate, isCertificate = false) {
@@ -85,7 +85,7 @@ function generateHTML(item) {
         .header-sub { font-family: "Century Gothic", sans-serif; color: #0066cc; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
         .item-name { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 25px; color: #333; padding-bottom: 10px; border-bottom: 2px solid #0066cc; }
         .info-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; margin-bottom: 20px; }
-        .card-title { font-weight: bold; color: #0066cc; margin-bottom: 15px; font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid '); }
+        .card-title { font-weight: bold; color: #0066cc; margin-bottom: 15px; font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid #e0e0e0; }
         .detail-row { display: flex; margin-bottom: 10px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
         .detail-row:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
         .detail-label { font-weight: bold; width: 50%; color: #555; font-size: 16px; padding-right: 5px; }
@@ -225,7 +225,7 @@ function generateHTML(item) {
     </div>
 
     <script>
-        // Email Functions - Using the working approach from your script
+        // Email Functions - Simple mailto approach that works
         function sendRequest(itemName) {
             const quantityInput = document.querySelector('.quantity-input');
             const quantity = quantityInput.value;
@@ -243,15 +243,19 @@ function generateHTML(item) {
         }
 
         function sendItemExpiryAlert(itemName, batchNumber, isExpired) {
-            const subject = \`High Importance : \${itemName} is \${isExpired ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
+            // Convert string to boolean if needed
+            const isExpiredBool = (isExpired === 'true' || isExpired === true);
+            const subject = \`High Importance : \${itemName} is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
+            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
             
             window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
         }
 
         function sendCertExpiryAlert(itemName, isExpired) {
-            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpired ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} Halal certificate is \${isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
+            // Convert string to boolean if needed
+            const isExpiredBool = (isExpired === 'true' || isExpired === true);
+            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
+            const body = \`Hi. The \${itemName} Halal certificate is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
             
             window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
         }
