@@ -222,7 +222,7 @@ function generateHTML(item) {
             <button class="btn btn-purple">Stock Request</button>
             <label class="quantity-label">Quantity:</label>
             <input type="text" class="quantity-input" placeholder="Enter quantity" id="quantityInput">
-            <a href="#" class="btn btn-green" id="sendRequestBtn" onclick="prepareEmail('${item['Item Name']}')">Send Request</a>
+            <button class="btn btn-green" id="sendRequestBtn" onclick="sendRequest('${item['Item Name']}')">Send Request</button>
         </div>
         
         <!-- Email Fallback Container -->
@@ -242,10 +242,9 @@ function generateHTML(item) {
     </div>
 
     <script>
-        function prepareEmail(itemName) {
+        function sendRequest(itemName) {
             const quantityInput = document.getElementById('quantityInput');
             const quantity = quantityInput.value;
-            const sendRequestBtn = document.getElementById('sendRequestBtn');
             
             if (!quantity) {
                 alert('Please enter a quantity');
@@ -260,13 +259,8 @@ function generateHTML(item) {
             const subject = \`Stock Request - \${itemName}\`;
             const body = \`Hi. I want to request for \${itemName} with a quantity of \${quantity}. Thank you.\`;
             
-            // Update the href with the mailto link
-            sendRequestBtn.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
-            
-            // For demonstration purposes, show the email content
-            document.getElementById('fallbackSubject').textContent = subject;
-            document.getElementById('fallbackBody').value = body;
-            document.getElementById('emailFallback').style.display = 'block';
+            // Directly open the email client
+            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
             
             // Reset the input field
             quantityInput.value = '';
