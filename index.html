@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i-HIC - Login</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { padding: 15px; background-color: #f5f5f5; font-family: Arial, sans-serif; 
+               display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-container { max-width: 400px; width: 100%; margin: 0 auto; background: white; 
+                          border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .header-main { font-family: "Century Gothic", sans-serif; color: #0066cc; font-size: 24px; 
+                      font-weight: 800; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .header-sub { font-family: "Century Gothic", sans-serif; color: #0066cc; font-size: 20px; 
+                     font-weight: 800; letter-spacing: 1px; margin-bottom: 30px; }
+        .passkey-input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ddd; 
+                        border-radius: 5px; font-size: 16px; text-align: center; }
+        .login-btn { width: 100%; padding: 12px; background-color: #0066cc; color: white; 
+                    border: none; border-radius: 5px; font-size: 16px; cursor: pointer; 
+                    transition: background-color 0.3s; }
+        .login-btn:hover { background-color: #0055aa; }
+        .error-message { color: #e74c3c; margin-top: 10px; font-size: 14px; height: 20px; }
+        .info-text { margin-top: 20px; color: #666; font-size: 14px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header-main">INSTANT HALAL & INVENTORY CHECKER</div>
+        <div class="header-sub">(i-HIC)</div>
+        
+        <input type="password" class="passkey-input" placeholder="Enter Passkey" id="passkeyInput">
+        <div class="error-message" id="errorMessage"></div>
+        <button class="login-btn" onclick="attemptLogin()">Login</button>
+    </div>
+
+    <script>
+        async function fetchValidPasskeys() {
+            try {
+                const response = await fetch('/manifest.json');
+                const data = await response.json();
+                return data.availableItems;
+            } catch (error) {
+                console.error('Error loading passkeys:', error);
+                return [];
+            }
+        }
+
+        async function attemptLogin() {
+            const passkey = document.getElementById('passkeyInput').value.trim();
+            const errorElement = document.getElementById('errorMessage');
+            
+            errorElement.textContent = '';
+            
+            if (!passkey) {
+                errorElement.textContent = 'Please enter a passkey';
+                return;
+            }
+            
+            const validPasskeys = await fetchValidPasskeys();
+            if (validPasskeys.includes(passkey)) {
+                window.location.href = `item_${passkey}.html`;
+            } else {
+                errorElement.textContent = 'Invalid passkey. Please try again.';
+            }
+        }
+
+        document.getElementById('passkeyInput').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') attemptLogin();
+        });
+    </script>
+</body>
+</html>
