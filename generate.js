@@ -85,7 +85,7 @@ function generateHTML(item) {
         .header-sub { font-family: "Century Gothic", sans-serif; color: #0066cc; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
         .item-name { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 25px; color: #333; padding-bottom: 10px; border-bottom: 2px solid #0066cc; }
         .info-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; margin-bottom: 20px; }
-        .card-title { font-weight: bold; color: #0066cc; margin-bottom: 15px; font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid #e0e0e0; }
+        .card-title { font-weight: bold; color: #0066cc; margin-bottom: 15px; font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid '); }
         .detail-row { display: flex; margin-bottom: 10px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
         .detail-row:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
         .detail-label { font-weight: bold; width: 50%; color: #555; font-size: 16px; padding-right: 5px; }
@@ -107,10 +107,6 @@ function generateHTML(item) {
         .expiry-alert-container { margin: 10px 0 5px 0; }
         .cert-alert-container { margin: 10px 0 5px 0; }
         .na-value { color: #7f8c8d; font-style: italic; }
-        .email-fallback { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
-        .email-fallback textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; }
-        .email-fallback button { margin-right: 10px; padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .hidden-form { display: none; }
         @media (min-width: 600px) { 
             .container { max-width: 600px; } 
             .header-main { font-size: 26px; }
@@ -225,89 +221,11 @@ function generateHTML(item) {
             <button class="btn btn-green" onclick="sendRequest('${item['Item Name']}')">Send Request</button>
         </div>
         
-        <!-- Hidden form for email fallback -->
-        <form id="emailForm" class="hidden-form" action="https://formsubmit.co/${EMAIL}" method="POST">
-            <input type="hidden" name="_subject" id="emailSubject">
-            <textarea name="message" id="emailBody" style="display:none;"></textarea>
-            <input type="hidden" name="_next" value="">
-        </form>
-        
-        <!-- Email Fallback Container -->
-        <div id="emailFallback" class="email-fallback" style="display: none;">
-            <h3>Email Content</h3>
-            <p><strong>To:</strong> ${EMAIL}</p>
-            <p><strong>Subject:</strong> <span id="fallbackSubject"></span></p>
-            <p><strong>Body:</strong></p>
-            <textarea id="fallbackBody" readonly></textarea>
-            <div>
-                <button onclick="copyToClipboard()">Copy Email Content</button>
-                <button onclick="submitEmailForm()">Submit via Form</button>
-                <button onclick="closeFallback()">Close</button>
-            </div>
-        </div>
-        
         <a href="index.html" class="back-btn">← Back</a>
     </div>
 
     <script>
-        // Enhanced Email Functions with multiple fallback options
-        function confirmAndSendEmail(subject, body) {
-            if (confirm('Are you sure you want to send this alert?')) {
-                // Try multiple methods
-                if (!tryMailtoLink(subject, body)) {
-                    if (!tryFormSubmit(subject, body)) {
-                        showEmailFallback(subject, body);
-                    }
-                }
-            }
-        }
-
-        function tryMailtoLink(subject, body) {
-            try {
-                const mailtoLink = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
-                window.location.href = mailtoLink;
-                return true;
-            } catch (e) {
-                console.log('Mailto link failed:', e);
-                return false;
-            }
-        }
-
-        function tryFormSubmit(subject, body) {
-            try {
-                document.getElementById('emailSubject').value = subject;
-                document.getElementById('emailBody').value = body;
-                document.getElementById('emailForm').submit();
-                return true;
-            } catch (e) {
-                console.log('Form submit failed:', e);
-                return false;
-            }
-        }
-
-        function showEmailFallback(subject, body) {
-            document.getElementById('fallbackSubject').textContent = subject;
-            document.getElementById('fallbackBody').value = body;
-            document.getElementById('emailFallback').style.display = 'block';
-        }
-
-        function closeFallback() {
-            document.getElementById('emailFallback').style.display = 'none';
-        }
-
-        function copyToClipboard() {
-            const textarea = document.getElementById('fallbackBody');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Email content copied to clipboard!');
-        }
-
-        function submitEmailForm() {
-            const subject = document.getElementById('fallbackSubject').textContent;
-            const body = document.getElementById('fallbackBody').value;
-            tryFormSubmit(subject, body);
-        }
-
+        // Email Functions - Using the working approach from your script
         function sendRequest(itemName) {
             const quantityInput = document.querySelector('.quantity-input');
             const quantity = quantityInput.value;
@@ -317,34 +235,25 @@ function generateHTML(item) {
                 return;
             }
             
-            if (isNaN(quantity) || quantity <= 0) {
-                alert('Please enter a valid quantity number');
-                return;
-            }
-            
             const subject = \`Stock Request - \${itemName}\`;
             const body = \`Hi. I want to request for \${itemName} with a quantity of \${quantity}. Thank you.\`;
             
-            confirmAndSendEmail(subject, body);
+            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
             quantityInput.value = '';
         }
 
         function sendItemExpiryAlert(itemName, batchNumber, isExpired) {
-            // Convert string to boolean if needed
-            const isExpiredBool = (isExpired === 'true' || isExpired === true);
-            const subject = \`High Importance : \${itemName} is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
+            const subject = \`High Importance : \${itemName} is \${isExpired ? 'Expired' : 'Nearly Expired'}\`;
+            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
             
-            confirmAndSendEmail(subject, body);
+            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
         }
 
         function sendCertExpiryAlert(itemName, isExpired) {
-            // Convert string to boolean if needed
-            const isExpiredBool = (isExpired === 'true' || isExpired === true);
-            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} Halal certificate is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
+            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpired ? 'Expired' : 'Nearly Expired'}\`;
+            const body = \`Hi. The \${itemName} Halal certificate is \${isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
             
-            confirmAndSendEmail(subject, body);
+            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
         }
 
         // Initialize on load
@@ -405,7 +314,7 @@ function generateHTML(item) {
 </html>`;
 }
 
-// File Generation (unchanged)
+// File Generation
 async function generateFiles() {
     console.log('Starting build process...');
     
@@ -465,7 +374,7 @@ async function generateFiles() {
     });
 }
 
-// Watch Mode (unchanged)
+// Watch Mode
 function setupWatcher() {
     console.log(`Watching for changes to ${CSV_FILE}...`);
     chokidar.watch(CSV_FILE)
@@ -475,7 +384,7 @@ function setupWatcher() {
         });
 }
 
-// Main Execution (unchanged)
+// Main Execution
 (async () => {
     try {
         await generateFiles();
