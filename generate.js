@@ -63,8 +63,8 @@ function getExpiryStatus(expiryDate, isCertificate = false) {
 function generateHTML(item) {
     const itemExpiryDate = parseDate(item['Item Expiry Date']);
     const certExpiryDate = parseDate(item['Certificate Expiry Date']);
-    const itemExpiryStatus = getExpiryStatus(itemExpiryDate, false); // false = item expiry
-    const certExpiryStatus = getExpiryStatus(certExpiryDate, true);  // true = certificate expiry
+    const itemExpiryStatus = getExpiryStatus(itemExpiryDate, false);
+    const certExpiryStatus = getExpiryStatus(certExpiryDate, true);
 
     // Determine Halal Certificate URL
     const halalCertUrl = item['Halal Certificate URL'] || 
@@ -158,7 +158,7 @@ function generateHTML(item) {
             </div>
             ${itemExpiryStatus.alert ? `
             <div id="expiryAlertContainer" class="expiry-alert-container">
-                <a href="mailto:${EMAIL}?subject=High Importance : ${item['Item Name']} is ${itemExpiryStatus.isExpired ? 'Expired' : 'Nearly Expired'}&body=Hi. The ${item['Item Name']} with Identification Number of ${item['Batch/GRIS No.']} is ${itemExpiryStatus.isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you." class="btn btn-red">
+                <a href="mailto:${EMAIL}?subject=High Importance : ${encodeURIComponent(item['Item Name'])} is ${itemExpiryStatus.isExpired ? 'Expired' : 'Nearly Expired'}&body=Hi. The ${encodeURIComponent(item['Item Name'])} with Identification Number of ${encodeURIComponent(item['Batch/GRIS No.'])} is ${itemExpiryStatus.isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you." class="btn btn-red">
                     ${itemExpiryStatus.alertText}
                 </a>
             </div>
@@ -204,7 +204,7 @@ function generateHTML(item) {
             </div>
             ${certExpiryStatus.alert ? `
             <div id="certAlertContainer" class="cert-alert-container">
-                <a href="mailto:${EMAIL}?subject=High Importance : ${item['Item Name']} Halal Certificate is ${certExpiryStatus.isExpired ? 'Expired' : 'Nearly Expired'}&body=Hi. The ${item['Item Name']} Halal certificate is ${certExpiryStatus.isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you." class="btn btn-red">
+                <a href="mailto:${EMAIL}?subject=High Importance : ${encodeURIComponent(item['Item Name'])} Halal Certificate is ${certExpiryStatus.isExpired ? 'Expired' : 'Nearly Expired'}&body=Hi. The ${encodeURIComponent(item['Item Name'])} Halal certificate is ${certExpiryStatus.isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you." class="btn btn-red">
                     ${certExpiryStatus.alertText}
                 </a>
             </div>
@@ -223,11 +223,6 @@ function generateHTML(item) {
             <label class="quantity-label">Quantity:</label>
             <input type="text" class="quantity-input" placeholder="Enter quantity" id="quantityInput">
             <a href="#" class="btn btn-green" id="sendRequestBtn">Send Request</a>
-            
-            <!-- Hidden email link (same format as expiry buttons) -->
-            <a href="mailto:${EMAIL}?subject=Stock Request - ${item['Item Name']}&body=Hi. I want to request for ${item['Item Name']} (Item ID: ${item['Item ID']}, Batch/GRIS No.: ${item['Batch/GRIS No.']}) with a quantity of QUANTITY_PLACEHOLDER. Thank you." 
-               id="emailLink" 
-               style="display: none;"></a>
         </div>
         
         <a href="index.html" class="back-btn">← Back</a>
@@ -237,7 +232,6 @@ function generateHTML(item) {
         document.addEventListener('DOMContentLoaded', function() {
             const sendRequestBtn = document.getElementById('sendRequestBtn');
             const quantityInput = document.getElementById('quantityInput');
-            const emailLink = document.getElementById('emailLink');
             
             sendRequestBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -254,13 +248,18 @@ function generateHTML(item) {
                     return;
                 }
                 
-                // Update the email link with the actual quantity
-                const currentHref = emailLink.getAttribute('href');
-                const updatedHref = currentHref.replace('QUANTITY_PLACEHOLDER', quantity);
-                emailLink.setAttribute('href', updatedHref);
+                // Create mailto link directly (same as expiry buttons)
+                const subject = 'Stock Request - ${item['Item Name'].replace(/'/g, "\\'")}';
+                const body = 'Hi. I want to request for ${item['Item Name'].replace(/'/g, "\\'")} ' +
+                             '(Item ID: ${item['Item ID']}, ' +
+                             'Batch/GRIS No.: ${item['Batch/GRIS No.']}) ' +
+                             'with a quantity of ' + quantity + '. Thank you.';
                 
-                // Trigger the click on the hidden email link (same as expiry buttons)
-                emailLink.click();
+                const mailtoLink = 'mailto:${EMAIL}?subject=' + encodeURIComponent(subject) + 
+                                  '&body=' + encodeURIComponent(body);
+                
+                // Open email client directly
+                window.location.href = mailtoLink;
                 
                 // Reset the input field
                 quantityInput.value = '';
@@ -335,7 +334,7 @@ async function generateFiles() {
 
     const items = [];
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) {
         fs.createReadStream(CSV_FILE)
             .pipe(csv())
             .on('data', (data) => {
