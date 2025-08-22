@@ -1,10 +1,11 @@
 Item ID,Item Name,Category,Batch/GRIS No.,Brand,Supplier,Purchased Date,Item Expiry Date,Invoice,Halal Certificate,Certificate Expiry Date,Halal Certificate,Stock Available
 1,Capsule Shell,Raw Material,G017/24,NashmirCaps,Nashmir Sdn Bhd,1/4/2024,23/06/2028,https://drive.google.com/file/d/1Fcrf8mNBS243pJiwaCrID4e1akUa4F5W/view?usp=sharing,Available,8/8/2026,https://drive.google.com/file/d/1mt6J5d4LQXW7aZCncq6hILnsR9NtQ-0i/view?usp=sharing,125000 pcs
-2,Tongkat Ali Extract,Raw Material,TA230501,Physta,Phytes Biotek Sdn Bhd,3/7/2023,23/08/2025,https://drive.google.com/file/d/1Fcrf8mNBS243pJiwaCrID4e1akUa4F5W/view?usp=sharing,Available,5/4/2025,https://drive.google.com/file/d/1pnusXz5VqOJ38MAGa8syT0D5Cy9dfiTz/view?usp=sharing,3.7 kg
+2,Tongkat Ali Extract,Raw Material,TA230501,Physta,Phytes Biotek Sdn Bhd,3/7/2023,24/08/2025,https://drive.google.com/file/d/1Fcrf8mNBS243pJiwaCrID4e1akUa4F5W/view?usp=sharing,Available,5/4/2025,https://drive.google.com/file/d/1pnusXz5VqOJ38MAGa8syT0D5Cy9dfiTz/view?usp=sharing,3.7 kg
 3,HDPE Bottle,Packaging Material,G401/22,Ulik,Ulik Sdn Bhd,26/09/2022,NA,https://drive.google.com/file/d/1Fcrf8mNBS243pJiwaCrID4e1akUa4F5W/view?usp=sharing,Not Available,NA,NA,2500 bottles
 4,Nylon Plastic Bag,Packaging Material,P056/21,TriPlastic,UniPlastic Sdn Bhd,21/07/2021,NA,https://drive.google.com/file/d/1Fcrf8mNBS243pJiwaCrID4e1akUa4F5W/view?usp=sharing,Not Available,NA,NA,3210 pcs
 24,Capsule Shell,Raw Material,G002/25,VEGE CAPSULE (HPMC),Nashmir Capsule Sdn Bhd,13/01/2025,NA,https://drive.google.com/file/d/1YcHyopXSSecugI4iEG5eT53TttfNSy8m/view?usp=sharing,Available,31/1/2026,https://drive.google.com/file/d/1pnZwxVCRkokCuzaG5v_2Vo5adOhjxsIo/view?usp=sharing,50000 pcs
 44,Pecah Beling Extract,Raw Material,R045/21,ForUs,FRIM,9/6/2022,22/05/2025,https://drive.google.com/file/d/1YcHyopXSSecugI4iEG5eT53TttfNSy8m/view?usp=sharing,Available,5/1/2025,https://drive.google.com/file/d/1pnZwxVCRkokCuzaG5v_2Vo5adOhjxsIo/view?usp=sharing,3.88 Kg
 56,Kacip fatimah Extract,Raw Material,G022/022,ForMe,FROM,7/5/2024,17/05/2025,NA,Available,30/05/2025,https://drive.google.com/file/d/1pnZwxVCRkokCuzaG5v_2Vo5adOhjxsIo/view?usp=sharing,5.2 Kg
 78,Temu Lawak,Raw Material,123/23,ForThem,FRAM,,21/06/2025,NA,Available,23/05/2025,https://drive.google.com/file/d/1pnZwxVCRkokCuzaG5v_2Vo5adOhjxsIo/view?usp=sharing,4.99 Kg
+
 
