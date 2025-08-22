@@ -268,12 +268,12 @@ function generateHTML(item) {
                     return;
                 }
                 
-                // Create mailto link directly (same as expiry buttons)
+                // Create mailto link with the updated email content
                 const subject = 'Stock Request - ${escapedItemName}';
                 const body = 'Hi. I want to request for ${escapedItemName} ' +
-                             '(Item ID: ${escapedItemId}, ' +
-                             'Batch/GRIS No.: ${escapedBatchNo}) ' +
-                             'with a quantity of ' + quantity + '. Thank you.';
+                             '(${escapedBatchNo}) ' +
+                             'with a quantity of ' + quantity + 
+                             ' (Available Stock: ${escapedStock}). Thank you.';
                 
                 const mailtoLink = 'mailto:${EMAIL}?subject=' + encodeURIComponent(subject) + 
                                   '&body=' + encodeURIComponent(body);
