@@ -30,7 +30,7 @@ function getExpiryStatus(expiryDate, isCertificate = false) {
     if (!expiryDate) return { class: 'na-value', text: '', alert: false };
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize time for accurate day calculation
+    today.setHours(0, 0, 0, 0);
     
     const timeDiff = expiryDate.getTime() - today.getTime();
     const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -59,6 +59,17 @@ function getExpiryStatus(expiryDate, isCertificate = false) {
     };
 }
 
+// Escape HTML special characters
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // HTML Template Generator
 function generateHTML(item) {
     const itemExpiryDate = parseDate(item['Item Expiry Date']);
@@ -70,12 +81,21 @@ function generateHTML(item) {
     const halalCertUrl = item['Halal Certificate URL'] || 
                         (item['Halal Certificate'] && item['Halal Certificate'].startsWith('http') ? item['Halal Certificate'] : null);
 
+    // Escape all dynamic content
+    const escapedItemName = escapeHtml(item['Item Name']);
+    const escapedItemId = escapeHtml(item['Item ID']);
+    const escapedBatchNo = escapeHtml(item['Batch/GRIS No.']);
+    const escapedCategory = escapeHtml(item['Category']);
+    const escapedBrand = escapeHtml(item['Brand']);
+    const escapedSupplier = escapeHtml(item['Supplier']);
+    const escapedStock = escapeHtml(item['Stock Available']);
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>i-HIC - ${item['Item Name']} Details</title>
+    <title>i-HIC - ${escapedItemName} Details</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { padding: 15px; background-color: #f5f5f5; font-family: Arial, sans-serif; }
@@ -125,30 +145,30 @@ function generateHTML(item) {
             <div class="header-main">INSTANT HALAL & INVENTORY CHECKER</div>
             <div class="header-sub">(i-HIC)</div>
         </div>
-        <div class="item-name">${item['Item Name']}</div>
+        <div class="item-name">${escapedItemName}</div>
         
         <!-- Product Info Card -->
         <div class="info-card">
             <div class="card-title">Product Info</div>
             <div class="detail-row">
                 <div class="detail-label">Item ID:</div>
-                <div class="detail-value">${item['Item ID']}</div>
+                <div class="detail-value">${escapedItemId}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Category:</div>
-                <div class="detail-value">${item['Category']}</div>
+                <div class="detail-value">${escapedCategory}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Batch/GRIS No.:</div>
-                <div class="detail-value">${item['Batch/GRIS No.']}</div>
+                <div class="detail-value">${escapedBatchNo}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Brand:</div>
-                <div class="detail-value">${item['Brand']}</div>
+                <div class="detail-value">${escapedBrand}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Supplier:</div>
-                <div class="detail-value">${item['Supplier']}</div>
+                <div class="detail-value">${escapedSupplier}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Item Expiry Date:</div>
@@ -165,7 +185,7 @@ function generateHTML(item) {
             ` : ''}
             <div class="detail-row">
                 <div class="detail-label">Stock Available:</div>
-                <div class="detail-value">${item['Stock Available']}</div>
+                <div class="detail-value">${escapedStock}</div>
             </div>
         </div>
         
@@ -249,10 +269,10 @@ function generateHTML(item) {
                 }
                 
                 // Create mailto link directly (same as expiry buttons)
-                const subject = 'Stock Request - ${item['Item Name'].replace(/'/g, "\\'")}';
-                const body = 'Hi. I want to request for ${item['Item Name'].replace(/'/g, "\\'")} ' +
-                             '(Item ID: ${item['Item ID']}, ' +
-                             'Batch/GRIS No.: ${item['Batch/GRIS No.']}) ' +
+                const subject = 'Stock Request - ${escapedItemName}';
+                const body = 'Hi. I want to request for ${escapedItemName} ' +
+                             '(Item ID: ${escapedItemId}, ' +
+                             'Batch/GRIS No.: ${escapedBatchNo}) ' +
                              'with a quantity of ' + quantity + '. Thank you.';
                 
                 const mailtoLink = 'mailto:${EMAIL}?subject=' + encodeURIComponent(subject) + 
@@ -264,58 +284,6 @@ function generateHTML(item) {
                 // Reset the input field
                 quantityInput.value = '';
             });
-            
-            // Initialize on load
-            const itemName = '${item['Item Name'].replace(/'/g, "\\'")}';
-            const batchNumber = '${item['Batch/GRIS No.']}';
-            
-            ${item['Item Expiry Date'] !== 'NA' ? `
-                // Parse the date in the same format as server-side
-                const itemExpiryParts = '${item['Item Expiry Date']}'.split('/');
-                const itemExpiryDate = new Date(itemExpiryParts[2], itemExpiryParts[1] - 1, itemExpiryParts[0]);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const itemTimeDiff = itemExpiryDate.getTime() - today.getTime();
-                const itemDaysRemaining = Math.ceil(itemTimeDiff / (1000 * 3600 * 24));
-                
-                const itemExpiryElement = document.getElementById('itemExpiryDate');
-                if (itemExpiryElement) {
-                    itemExpiryElement.textContent = '${formatDate(parseDate(item['Item Expiry Date']))} ' + (itemDaysRemaining < 1 ? '(Expired)' : '(Expires in ' + itemDaysRemaining + ' days)');
-                    itemExpiryElement.className = 'detail-value ' + (itemDaysRemaining < 15 ? 'expired' : 'valid');
-                }
-                
-                // Show/hide alert button based on days remaining
-                const expiryAlertContainer = document.getElementById('expiryAlertContainer');
-                if (expiryAlertContainer) {
-                    if (itemDaysRemaining >= 15) {
-                        expiryAlertContainer.style.display = 'none';
-                    }
-                }
-            ` : ''}
-            
-            ${item['Certificate Expiry Date'] !== 'NA' && halalCertUrl ? `
-                // Parse the date in the same format as server-side
-                const certExpiryParts = '${item['Certificate Expiry Date']}'.split('/');
-                const certExpiryDate = new Date(certExpiryParts[2], certExpiryParts[1] - 1, certExpiryParts[0]);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const certTimeDiff = certExpiryDate.getTime() - today.getTime();
-                const certDaysRemaining = Math.ceil(certTimeDiff / (1000 * 3600 * 24));
-                
-                const certExpiryElement = document.getElementById('certExpiryDate');
-                if (certExpiryElement) {
-                    certExpiryElement.textContent = '${formatDate(parseDate(item['Certificate Expiry Date']))} ' + (certDaysRemaining < 1 ? '(Expired)' : '(Expires in ' + certDaysRemaining + ' days)');
-                    certExpiryElement.className = 'detail-value ' + (certDaysRemaining < 15 ? 'expired' : 'valid');
-                }
-                
-                // Show/hide alert button based on days remaining
-                const certAlertContainer = document.getElementById('certAlertContainer');
-                if (certAlertContainer) {
-                    if (certDaysRemaining >= 15) {
-                        certAlertContainer.style.display = 'none';
-                    }
-                }
-            ` : ''}
         });
     </script>
 </body>
@@ -334,7 +302,7 @@ async function generateFiles() {
 
     const items = [];
     
-    return new Promise((resolve, reject) {
+    return new Promise((resolve, reject) => {
         fs.createReadStream(CSV_FILE)
             .pipe(csv())
             .on('data', (data) => {
