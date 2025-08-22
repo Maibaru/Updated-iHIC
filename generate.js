@@ -107,6 +107,9 @@ function generateHTML(item) {
         .expiry-alert-container { margin: 10px 0 5px 0; }
         .cert-alert-container { margin: 10px 0 5px 0; }
         .na-value { color: #7f8c8d; font-style: italic; }
+        .email-fallback { display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
+        .email-fallback textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; }
+        .email-fallback button { margin-right: 10px; }
         @media (min-width: 600px) { 
             .container { max-width: 600px; } 
             .header-main { font-size: 26px; }
@@ -221,15 +224,57 @@ function generateHTML(item) {
             <button class="btn btn-green" onclick="sendRequest('${item['Item Name']}')">Send Request</button>
         </div>
         
+        <!-- Email Fallback Container -->
+        <div id="emailFallback" class="email-fallback">
+            <h3>Email Content</h3>
+            <p><strong>To:</strong> ${EMAIL}</p>
+            <p><strong>Subject:</strong> <span id="fallbackSubject"></span></p>
+            <p><strong>Body:</strong></p>
+            <textarea id="fallbackBody" readonly></textarea>
+            <button onclick="copyToClipboard()">Copy Email Content</button>
+            <button onclick="closeFallback()">Close</button>
+        </div>
+        
         <a href="index.html" class="back-btn">← Back</a>
     </div>
 
     <script>
-        // Email Functions
+        // Enhanced Email Functions with better error handling
         function confirmAndSendEmail(subject, body) {
             if (confirm('Are you sure you want to send this alert?')) {
-                window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
+                const mailtoLink = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
+                
+                try {
+                    // Try to open email client
+                    window.location.href = mailtoLink;
+                    
+                    // Fallback: if email client doesn't open after a short delay, show manual option
+                    setTimeout(() => {
+                        if (!document.hidden) { // If page is still visible, email client didn't open
+                            showEmailFallback(subject, body);
+                        }
+                    }, 1000);
+                } catch (e) {
+                    showEmailFallback(subject, body);
+                }
             }
+        }
+
+        function showEmailFallback(subject, body) {
+            document.getElementById('fallbackSubject').textContent = subject;
+            document.getElementById('fallbackBody').value = body;
+            document.getElementById('emailFallback').style.display = 'block';
+        }
+
+        function closeFallback() {
+            document.getElementById('emailFallback').style.display = 'none';
+        }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('fallbackBody');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Email content copied to clipboard!');
         }
 
         function sendRequest(itemName) {
@@ -241,6 +286,11 @@ function generateHTML(item) {
                 return;
             }
             
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Please enter a valid quantity number');
+                return;
+            }
+            
             const subject = \`Stock Request - \${itemName}\`;
             const body = \`Hi. I want to request for \${itemName} with a quantity of \${quantity}. Thank you.\`;
             
@@ -249,15 +299,19 @@ function generateHTML(item) {
         }
 
         function sendItemExpiryAlert(itemName, batchNumber, isExpired) {
-            const subject = \`High Importance : \${itemName} is \${isExpired ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
+            // Convert string to boolean if needed
+            const isExpiredBool = (isExpired === 'true' || isExpired === true);
+            const subject = \`High Importance : \${itemName} is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
+            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
             
             confirmAndSendEmail(subject, body);
         }
 
         function sendCertExpiryAlert(itemName, isExpired) {
-            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpired ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} Halal certificate is \${isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
+            // Convert string to boolean if needed
+            const isExpiredBool = (isExpired === 'true' || isExpired === true);
+            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
+            const body = \`Hi. The \${itemName} Halal certificate is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
             
             confirmAndSendEmail(subject, body);
         }
@@ -320,7 +374,7 @@ function generateHTML(item) {
 </html>`;
 }
 
-// File Generation
+// File Generation (unchanged)
 async function generateFiles() {
     console.log('Starting build process...');
     
@@ -380,7 +434,7 @@ async function generateFiles() {
     });
 }
 
-// Watch Mode
+// Watch Mode (unchanged)
 function setupWatcher() {
     console.log(`Watching for changes to ${CSV_FILE}...`);
     chokidar.watch(CSV_FILE)
@@ -390,7 +444,7 @@ function setupWatcher() {
         });
 }
 
-// Main Execution
+// Main Execution (unchanged)
 (async () => {
     try {
         await generateFiles();
