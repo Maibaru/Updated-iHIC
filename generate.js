@@ -26,7 +26,7 @@ function formatDate(date) {
     return `${day}/${month}/${year}`;
 }
 
-function getExpiryStatus(expiryDate) {
+function getExpiryStatus(expiryDate, isCertificate = false) {
     if (!expiryDate) return { class: 'na-value', text: '', alert: false };
 
     const today = new Date();
@@ -40,7 +40,7 @@ function getExpiryStatus(expiryDate) {
             class: 'expired',
             text: '(Expired)',
             alert: true,
-            alertText: 'Item Expired. Contact PIC',
+            alertText: isCertificate ? 'Certificate Expired. Contact PIC' : 'Item Expired. Contact PIC',
             isExpired: true
         };
     } else if (daysRemaining < 15) {
@@ -48,7 +48,7 @@ function getExpiryStatus(expiryDate) {
             class: 'expired',
             text: `(Expires in ${daysRemaining} days)`,
             alert: true,
-            alertText: 'Nearly Expired. Contact PIC',
+            alertText: isCertificate ? 'Certificate Nearly Expired. Contact PIC' : 'Nearly Expired. Contact PIC',
             isExpired: false
         };
     }
@@ -63,8 +63,8 @@ function getExpiryStatus(expiryDate) {
 function generateHTML(item) {
     const itemExpiryDate = parseDate(item['Item Expiry Date']);
     const certExpiryDate = parseDate(item['Certificate Expiry Date']);
-    const itemExpiryStatus = getExpiryStatus(itemExpiryDate);
-    const certExpiryStatus = getExpiryStatus(certExpiryDate);
+    const itemExpiryStatus = getExpiryStatus(itemExpiryDate, false); // false = item expiry
+    const certExpiryStatus = getExpiryStatus(certExpiryDate, true);  // true = certificate expiry
 
     // Determine Halal Certificate URL
     const halalCertUrl = item['Halal Certificate URL'] || 
