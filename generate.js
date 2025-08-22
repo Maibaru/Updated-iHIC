@@ -107,9 +107,10 @@ function generateHTML(item) {
         .expiry-alert-container { margin: 10px 0 5px 0; }
         .cert-alert-container { margin: 10px 0 5px 0; }
         .na-value { color: #7f8c8d; font-style: italic; }
-        .email-fallback { display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
+        .email-fallback { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
         .email-fallback textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; }
-        .email-fallback button { margin-right: 10px; }
+        .email-fallback button { margin-right: 10px; padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .hidden-form { display: none; }
         @media (min-width: 600px) { 
             .container { max-width: 600px; } 
             .header-main { font-size: 26px; }
@@ -224,39 +225,63 @@ function generateHTML(item) {
             <button class="btn btn-green" onclick="sendRequest('${item['Item Name']}')">Send Request</button>
         </div>
         
+        <!-- Hidden form for email fallback -->
+        <form id="emailForm" class="hidden-form" action="https://formsubmit.co/${EMAIL}" method="POST">
+            <input type="hidden" name="_subject" id="emailSubject">
+            <textarea name="message" id="emailBody" style="display:none;"></textarea>
+            <input type="hidden" name="_next" value="">
+        </form>
+        
         <!-- Email Fallback Container -->
-        <div id="emailFallback" class="email-fallback">
+        <div id="emailFallback" class="email-fallback" style="display: none;">
             <h3>Email Content</h3>
             <p><strong>To:</strong> ${EMAIL}</p>
             <p><strong>Subject:</strong> <span id="fallbackSubject"></span></p>
             <p><strong>Body:</strong></p>
             <textarea id="fallbackBody" readonly></textarea>
-            <button onclick="copyToClipboard()">Copy Email Content</button>
-            <button onclick="closeFallback()">Close</button>
+            <div>
+                <button onclick="copyToClipboard()">Copy Email Content</button>
+                <button onclick="submitEmailForm()">Submit via Form</button>
+                <button onclick="closeFallback()">Close</button>
+            </div>
         </div>
         
         <a href="index.html" class="back-btn">← Back</a>
     </div>
 
     <script>
-        // Enhanced Email Functions with better error handling
+        // Enhanced Email Functions with multiple fallback options
         function confirmAndSendEmail(subject, body) {
             if (confirm('Are you sure you want to send this alert?')) {
-                const mailtoLink = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
-                
-                try {
-                    // Try to open email client
-                    window.location.href = mailtoLink;
-                    
-                    // Fallback: if email client doesn't open after a short delay, show manual option
-                    setTimeout(() => {
-                        if (!document.hidden) { // If page is still visible, email client didn't open
-                            showEmailFallback(subject, body);
-                        }
-                    }, 1000);
-                } catch (e) {
-                    showEmailFallback(subject, body);
+                // Try multiple methods
+                if (!tryMailtoLink(subject, body)) {
+                    if (!tryFormSubmit(subject, body)) {
+                        showEmailFallback(subject, body);
+                    }
                 }
+            }
+        }
+
+        function tryMailtoLink(subject, body) {
+            try {
+                const mailtoLink = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
+                window.location.href = mailtoLink;
+                return true;
+            } catch (e) {
+                console.log('Mailto link failed:', e);
+                return false;
+            }
+        }
+
+        function tryFormSubmit(subject, body) {
+            try {
+                document.getElementById('emailSubject').value = subject;
+                document.getElementById('emailBody').value = body;
+                document.getElementById('emailForm').submit();
+                return true;
+            } catch (e) {
+                console.log('Form submit failed:', e);
+                return false;
             }
         }
 
@@ -275,6 +300,12 @@ function generateHTML(item) {
             textarea.select();
             document.execCommand('copy');
             alert('Email content copied to clipboard!');
+        }
+
+        function submitEmailForm() {
+            const subject = document.getElementById('fallbackSubject').textContent;
+            const body = document.getElementById('fallbackBody').value;
+            tryFormSubmit(subject, body);
         }
 
         function sendRequest(itemName) {
