@@ -8,7 +8,7 @@ const CSV_FILE = 'Halal_Info_2.csv';
 const OUTPUT_DIR = 'generated';
 const EMAIL = 'mygml021@gmail.com';
 
-// Helper Functions
+// Helper Functions (unchanged)
 function parseDate(dateString) {
     if (!dateString || dateString === 'NA') return null;
     if (dateString.includes('/')) {
@@ -23,7 +23,7 @@ function formatDate(date) {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
-    return `${day}/${month/${year}`;
+    return `${day}/${month}/${year}`;
 }
 
 function getExpiryStatus(expiryDate, isCertificate = false) {
@@ -107,6 +107,10 @@ function generateHTML(item) {
         .expiry-alert-container { margin: 10px 0 5px 0; }
         .cert-alert-container { margin: 10px 0 5px 0; }
         .na-value { color: #7f8c8d; font-style: italic; }
+        .email-fallback { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
+        .email-fallback textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; }
+        .email-fallback button { margin-right: 10px; padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .hidden-form { display: none; }
         @media (min-width: 600px) { 
             .container { max-width: 600px; } 
             .header-main { font-size: 26px; }
@@ -154,9 +158,9 @@ function generateHTML(item) {
             </div>
             ${itemExpiryStatus.alert ? `
             <div id="expiryAlertContainer" class="expiry-alert-container">
-                <button class="btn btn-red" onclick="sendItemExpiryAlert('${item['Item Name']}', '${item['Batch/GRIS No.']}', ${itemExpiryStatus.isExpired})">
+                <a href="mailto:${EMAIL}?subject=High Importance : ${item['Item Name']} is ${itemExpiryStatus.isExpired ? 'Expired' : 'Nearly Expired'}&body=Hi. The ${item['Item Name']} with Identification Number of ${item['Batch/GRIS No.']} is ${itemExpiryStatus.isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you." class="btn btn-red">
                     ${itemExpiryStatus.alertText}
-                </button>
+                </a>
             </div>
             ` : ''}
             <div class="detail-row">
@@ -200,9 +204,9 @@ function generateHTML(item) {
             </div>
             ${certExpiryStatus.alert ? `
             <div id="certAlertContainer" class="cert-alert-container">
-                <button class="btn btn-red" onclick="sendCertExpiryAlert('${item['Item Name']}', ${certExpiryStatus.isExpired})">
+                <a href="mailto:${EMAIL}?subject=High Importance : ${item['Item Name']} Halal Certificate is ${certExpiryStatus.isExpired ? 'Expired' : 'Nearly Expired'}&body=Hi. The ${item['Item Name']} Halal certificate is ${certExpiryStatus.isExpired ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you." class="btn btn-red">
                     ${certExpiryStatus.alertText}
-                </button>
+                </a>
             </div>
             ` : ''}
             <div class="detail-row" style="margin-top: 5px;">
@@ -217,17 +221,29 @@ function generateHTML(item) {
         <div class="stock-request-box">
             <button class="btn btn-purple">Stock Request</button>
             <label class="quantity-label">Quantity:</label>
-            <input type="text" class="quantity-input" placeholder="Enter quantity">
+            <input type="text" class="quantity-input" placeholder="Enter quantity" id="quantityInput">
             <button class="btn btn-green" onclick="sendRequest('${item['Item Name']}')">Send Request</button>
+        </div>
+        
+        <!-- Email Fallback Container -->
+        <div id="emailFallback" class="email-fallback" style="display: none;">
+            <h3>Email Content</h3>
+            <p><strong>To:</strong> ${EMAIL}</p>
+            <p><strong>Subject:</strong> <span id="fallbackSubject"></span></p>
+            <p><strong>Body:</strong></p>
+            <textarea id="fallbackBody" readonly></textarea>
+            <div>
+                <button onclick="copyToClipboard()">Copy Email Content</button>
+                <button onclick="closeFallback()">Close</button>
+            </div>
         </div>
         
         <a href="index.html" class="back-btn">← Back</a>
     </div>
 
     <script>
-        // Email Functions - Simple mailto approach that works
         function sendRequest(itemName) {
-            const quantityInput = document.querySelector('.quantity-input');
+            const quantityInput = document.getElementById('quantityInput');
             const quantity = quantityInput.value;
             
             if (!quantity) {
@@ -235,29 +251,28 @@ function generateHTML(item) {
                 return;
             }
             
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Please enter a valid quantity number');
+                return;
+            }
+            
             const subject = \`Stock Request - \${itemName}\`;
             const body = \`Hi. I want to request for \${itemName} with a quantity of \${quantity}. Thank you.\`;
             
+            // Use mailto directly
             window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
             quantityInput.value = '';
         }
 
-        function sendItemExpiryAlert(itemName, batchNumber, isExpired) {
-            // Convert string to boolean if needed
-            const isExpiredBool = (isExpired === 'true' || isExpired === true);
-            const subject = \`High Importance : \${itemName} is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} with Identification Number of \${batchNumber} is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
-            
-            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
+        function copyToClipboard() {
+            const textarea = document.getElementById('fallbackBody');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Email content copied to clipboard!');
         }
 
-        function sendCertExpiryAlert(itemName, isExpired) {
-            // Convert string to boolean if needed
-            const isExpiredBool = (isExpired === 'true' || isExpired === true);
-            const subject = \`High Importance : \${itemName} Halal Certificate is \${isExpiredBool ? 'Expired' : 'Nearly Expired'}\`;
-            const body = \`Hi. The \${itemName} Halal certificate is \${isExpiredBool ? 'already expired' : 'nearly expired'}. Please do the necessary. Thank you.\`;
-            
-            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
+        function closeFallback() {
+            document.getElementById('emailFallback').style.display = 'none';
         }
 
         // Initialize on load
@@ -318,7 +333,7 @@ function generateHTML(item) {
 </html>`;
 }
 
-// File Generation
+// File Generation (unchanged)
 async function generateFiles() {
     console.log('Starting build process...');
     
@@ -378,7 +393,7 @@ async function generateFiles() {
     });
 }
 
-// Watch Mode
+// Watch Mode (unchanged)
 function setupWatcher() {
     console.log(`Watching for changes to ${CSV_FILE}...`);
     chokidar.watch(CSV_FILE)
@@ -388,7 +403,7 @@ function setupWatcher() {
         });
 }
 
-// Main Execution
+// Main Execution (unchanged)
 (async () => {
     try {
         await generateFiles();
