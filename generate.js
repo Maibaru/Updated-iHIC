@@ -8,7 +8,7 @@ const CSV_FILE = 'Halal_Info_2.csv';
 const OUTPUT_DIR = 'generated';
 const EMAIL = 'mygml021@gmail.com';
 
-// Helper Functions (unchanged)
+// Helper Functions
 function parseDate(dateString) {
     if (!dateString || dateString === 'NA') return null;
     if (dateString.includes('/')) {
@@ -223,6 +223,11 @@ function generateHTML(item) {
             <label class="quantity-label">Quantity:</label>
             <input type="text" class="quantity-input" placeholder="Enter quantity" id="quantityInput">
             <a href="#" class="btn btn-green" id="sendRequestBtn">Send Request</a>
+            
+            <!-- Hidden email link (same format as expiry buttons) -->
+            <a href="mailto:${EMAIL}?subject=Stock Request - ${item['Item Name']}&body=Hi. I want to request for ${item['Item Name']} (Item ID: ${item['Item ID']}, Batch/GRIS No.: ${item['Batch/GRIS No.']}) with a quantity of QUANTITY_PLACEHOLDER. Thank you." 
+               id="emailLink" 
+               style="display: none;"></a>
         </div>
         
         <a href="index.html" class="back-btn">← Back</a>
@@ -232,6 +237,7 @@ function generateHTML(item) {
         document.addEventListener('DOMContentLoaded', function() {
             const sendRequestBtn = document.getElementById('sendRequestBtn');
             const quantityInput = document.getElementById('quantityInput');
+            const emailLink = document.getElementById('emailLink');
             
             sendRequestBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -248,19 +254,13 @@ function generateHTML(item) {
                     return;
                 }
                 
-                const itemName = '${item['Item Name'].replace(/'/g, "\\'")}';
-                const itemID = '${item['Item ID']}';
-                const batchNumber = '${item['Batch/GRIS No.']}';
-                const subject = 'Stock Request - ' + itemName;
-                const body = 'Hi. I want to request for ' + itemName + 
-                             ' (Item ID: ' + itemID + 
-                             ', Batch/GRIS No.: ' + batchNumber + 
-                             ') with a quantity of ' + quantity + 
-                             '. Thank you.';
+                // Update the email link with the actual quantity
+                const currentHref = emailLink.getAttribute('href');
+                const updatedHref = currentHref.replace('QUANTITY_PLACEHOLDER', quantity);
+                emailLink.setAttribute('href', updatedHref);
                 
-                // Use the same mailto format as the expiry buttons
-                const mailtoLink = 'mailto:${EMAIL}?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-                window.location.href = mailtoLink;
+                // Trigger the click on the hidden email link (same as expiry buttons)
+                emailLink.click();
                 
                 // Reset the input field
                 quantityInput.value = '';
@@ -323,7 +323,7 @@ function generateHTML(item) {
 </html>`;
 }
 
-// File Generation (unchanged)
+// File Generation
 async function generateFiles() {
     console.log('Starting build process...');
     
@@ -383,7 +383,7 @@ async function generateFiles() {
     });
 }
 
-// Watch Mode (unchanged)
+// Watch Mode
 function setupWatcher() {
     console.log(`Watching for changes to ${CSV_FILE}...`);
     chokidar.watch(CSV_FILE)
@@ -393,7 +393,7 @@ function setupWatcher() {
         });
 }
 
-// Main Execution (unchanged)
+// Main Execution
 (async () => {
     try {
         await generateFiles();
