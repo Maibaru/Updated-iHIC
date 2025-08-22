@@ -222,63 +222,45 @@ function generateHTML(item) {
             <button class="btn btn-purple">Stock Request</button>
             <label class="quantity-label">Quantity:</label>
             <input type="text" class="quantity-input" placeholder="Enter quantity" id="quantityInput">
-            <button class="btn btn-green" id="sendRequestBtn" onclick="sendRequest('${item['Item Name']}')">Send Request</button>
-        </div>
-        
-        <!-- Email Fallback Container -->
-        <div id="emailFallback" class="email-fallback" style="display: none;">
-            <h3>Email Content</h3>
-            <p><strong>To:</strong> ${EMAIL}</p>
-            <p><strong>Subject:</strong> <span id="fallbackSubject"></span></p>
-            <p><strong>Body:</strong></p>
-            <textarea id="fallbackBody" readonly></textarea>
-            <div>
-                <button onclick="copyToClipboard()">Copy Email Content</button>
-                <button onclick="closeFallback()">Close</button>
-            </div>
+            <a href="#" class="btn btn-green" id="sendRequestBtn">Send Request</a>
         </div>
         
         <a href="index.html" class="back-btn">← Back</a>
     </div>
 
     <script>
-        function sendRequest(itemName) {
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendRequestBtn = document.getElementById('sendRequestBtn');
             const quantityInput = document.getElementById('quantityInput');
-            const quantity = quantityInput.value;
             
-            if (!quantity) {
-                alert('Please enter a quantity');
-                return;
-            }
+            sendRequestBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const quantity = quantityInput.value.trim();
+                
+                if (!quantity) {
+                    alert('Please enter a quantity');
+                    return;
+                }
+                
+                if (isNaN(quantity) || quantity <= 0) {
+                    alert('Please enter a valid quantity number');
+                    return;
+                }
+                
+                const itemName = '${item['Item Name']}';
+                const subject = 'Stock Request - ' + itemName;
+                const body = 'Hi. I want to request for ' + itemName + ' with a quantity of ' + quantity + '. Thank you.';
+                
+                // Create and open mailto link
+                const mailtoLink = 'mailto:${EMAIL}?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+                window.location.href = mailtoLink;
+                
+                // Reset the input field
+                quantityInput.value = '';
+            });
             
-            if (isNaN(quantity) || quantity <= 0) {
-                alert('Please enter a valid quantity number');
-                return;
-            }
-            
-            const subject = \`Stock Request - \${itemName}\`;
-            const body = \`Hi. I want to request for \${itemName} with a quantity of \${quantity}. Thank you.\`;
-            
-            // Directly open the email client
-            window.location.href = \`mailto:${EMAIL}?subject=\${encodeURIComponent(subject)}&body=\${encodeURIComponent(body)}\`;
-            
-            // Reset the input field
-            quantityInput.value = '';
-        }
-
-        function copyToClipboard() {
-            const textarea = document.getElementById('fallbackBody');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Email content copied to clipboard!');
-        }
-
-        function closeFallback() {
-            document.getElementById('emailFallback').style.display = 'none';
-        }
-
-        // Initialize on load
-        window.onload = function() {
+            // Initialize on load
             const itemName = '${item['Item Name']}';
             const batchNumber = '${item['Batch/GRIS No.']}';
             
@@ -293,8 +275,8 @@ function generateHTML(item) {
                 
                 const itemExpiryElement = document.getElementById('itemExpiryDate');
                 if (itemExpiryElement) {
-                    itemExpiryElement.textContent = \`${formatDate(parseDate(item['Item Expiry Date']))} \${itemDaysRemaining < 1 ? '(Expired)' : \`(Expires in \${itemDaysRemaining} days)\`}\`;
-                    itemExpiryElement.className = \`detail-value \${itemDaysRemaining < 15 ? 'expired' : 'valid'}\`;
+                    itemExpiryElement.textContent = '${formatDate(parseDate(item['Item Expiry Date']))} ' + (itemDaysRemaining < 1 ? '(Expired)' : '(Expires in ' + itemDaysRemaining + ' days)');
+                    itemExpiryElement.className = 'detail-value ' + (itemDaysRemaining < 15 ? 'expired' : 'valid');
                 }
                 
                 // Show/hide alert button based on days remaining
@@ -317,8 +299,8 @@ function generateHTML(item) {
                 
                 const certExpiryElement = document.getElementById('certExpiryDate');
                 if (certExpiryElement) {
-                    certExpiryElement.textContent = \`${formatDate(parseDate(item['Certificate Expiry Date']))} \${certDaysRemaining < 1 ? '(Expired)' : \`(Expires in \${certDaysRemaining} days)\`}\`;
-                    certExpiryElement.className = \`detail-value \${certDaysRemaining < 15 ? 'expired' : 'valid'}\`;
+                    certExpiryElement.textContent = '${formatDate(parseDate(item['Certificate Expiry Date']))} ' + (certDaysRemaining < 1 ? '(Expired)' : '(Expires in ' + certDaysRemaining + ' days)');
+                    certExpiryElement.className = 'detail-value ' + (certDaysRemaining < 15 ? 'expired' : 'valid');
                 }
                 
                 // Show/hide alert button based on days remaining
@@ -329,7 +311,7 @@ function generateHTML(item) {
                     }
                 }
             ` : ''}
-        };
+        });
     </script>
 </body>
 </html>`;
