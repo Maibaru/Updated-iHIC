@@ -248,7 +248,7 @@ function generateHTML(item) {
                     return;
                 }
                 
-                const itemName = '${item['Item Name']}';
+                const itemName = '${item['Item Name'].replace(/'/g, "\\'")}';
                 const itemID = '${item['Item ID']}';
                 const batchNumber = '${item['Batch/GRIS No.']}';
                 const subject = 'Stock Request - ' + itemName;
@@ -267,7 +267,7 @@ function generateHTML(item) {
             });
             
             // Initialize on load
-            const itemName = '${item['Item Name']}';
+            const itemName = '${item['Item Name'].replace(/'/g, "\\'")}';
             const batchNumber = '${item['Batch/GRIS No.']}';
             
             ${item['Item Expiry Date'] !== 'NA' ? `
