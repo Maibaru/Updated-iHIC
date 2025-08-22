@@ -249,10 +249,16 @@ function generateHTML(item) {
                 }
                 
                 const itemName = '${item['Item Name']}';
+                const itemID = '${item['Item ID']}';
+                const batchNumber = '${item['Batch/GRIS No.']}';
                 const subject = 'Stock Request - ' + itemName;
-                const body = 'Hi. I want to request for ' + itemName + ' with a quantity of ' + quantity + '. Thank you.';
+                const body = 'Hi. I want to request for ' + itemName + 
+                             ' (Item ID: ' + itemID + 
+                             ', Batch/GRIS No.: ' + batchNumber + 
+                             ') with a quantity of ' + quantity + 
+                             '. Thank you.';
                 
-                // Create and open mailto link
+                // Use the same mailto format as the expiry buttons
                 const mailtoLink = 'mailto:${EMAIL}?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
                 window.location.href = mailtoLink;
                 
